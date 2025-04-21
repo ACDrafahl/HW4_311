@@ -26,7 +26,17 @@ public class WeightedAdjacencyList<T> implements WeightedGraph<T> {
      */
     @Override
     public boolean addEdge(T u, T v, int weight) {
-        return false;
+        List<Pair<T, Long>> neighbors = adjacencyList.get(u);
+        if (neighbors == null || adjacencyList.get(v) == null || weight < 0) {
+            return false; // u or v not in graph or negative weight
+        }
+        for (Pair<T, Long> neighbor : neighbors) {
+            if (neighbor.getFirst().equals(v)) {
+                return false; // Edge already present
+            }
+        }
+        neighbors.add(new Pair<>(v, (long) weight));
+        return true; // Edge added successfully
     }
 
     /**
@@ -145,7 +155,7 @@ public class WeightedAdjacencyList<T> implements WeightedGraph<T> {
                 }
             }
         }
-        
+
         return distances;
     }
 }
