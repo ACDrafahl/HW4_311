@@ -52,7 +52,7 @@ public class WeightedAdjacencyList<T> implements WeightedGraph<T> {
             return false;
         }
         else {
-            adjacencyList.put(vertex, new ArrayList());
+            adjacencyList.put(vertex, new ArrayList<Pair<T, Long>>());
             return true;
         }
     }
@@ -144,7 +144,7 @@ public class WeightedAdjacencyList<T> implements WeightedGraph<T> {
     }
 
     /**
-     * Checks if two vertices are neighbors in the grap (uses hasEdge).
+     * Checks if two vertices are neighbors in the graph (uses hasEdge).
      * @param u
      * @param v
      * @return

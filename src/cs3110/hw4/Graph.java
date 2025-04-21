@@ -1,8 +1,6 @@
 package cs3110.hw4;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * An interface for implementing various operations on connected weighted graphs.

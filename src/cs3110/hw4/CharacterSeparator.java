@@ -3,8 +3,7 @@ package cs3110.hw4;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.Map; // Added
 // Added for testing
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -42,11 +41,11 @@ public class CharacterSeparator {
             processor.writeToFile();
             System.out.println("Saving processed image as: " + inputPath + ".new.bmp");
             
-            } 
-            catch (IOException e) {
-                System.out.println("Error processing image: " + e.getMessage());
-            }
+        } 
+        catch (IOException e) {
+            System.out.println("Error processing image: " + e.getMessage());
         }
+    }
 
     /**
      * This method uses the WeightedAdjacencyList class to identify the space
@@ -61,6 +60,106 @@ public class CharacterSeparator {
      *         occurred loading the image.
      */
     public static Pair<List<Integer>, List<Integer>> findSeparationWeighted(String path) {
-        return null;
+        List<Integer> rowSeps = new ArrayList<>();
+        List<Integer> colSeps = new ArrayList<>();
+
+        try {
+            // Load the image and get the pixel matrix
+            BitmapProcessor processor = new BitmapProcessor(path);
+            int[][] pixelMatrix = processor.getRGBMatrix();
+
+            // Create a graph from the pixel matrix
+            int height = pixelMatrix.length;
+            int width = pixelMatrix[0].length;
+            List<String> vertices = new ArrayList<>();
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    vertices.add(i + ","+ j);
+                }
+            }
+
+            WeightedGraph<String> graph = new WeightedAdjacencyList<>(vertices);
+
+            // Pair pixels with their neighbors
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    String currentVertex = i + "," + j;
+                    int currentValue = getIntensity(pixelMatrix[i][j]);
+
+                    if (j + 1 < width) {
+                        String rightVertex = i + "," + (j + 1);
+                        int rightValue = getIntensity(pixelMatrix[i][j + 1]);
+                        int weight = (currentValue + rightValue) / 2;
+                        graph.addEdge(currentVertex, rightVertex, weight); // Add both directions
+                        graph.addEdge(rightVertex, currentVertex, weight); // to get undirected edges (unsure about this)
+                    }
+
+                    if (i + 1 < height) {
+                        String downVertex = (i + 1) + "," + j;
+                        int downValue = getIntensity(pixelMatrix[i + 1][j]);
+                        int weight = (currentValue + downValue) / 2;
+                        graph.addEdge(currentVertex, downVertex, weight); // Add both directions
+                        graph.addEdge(downVertex, currentVertex, weight); // to get undirected edges (unsure about this)
+                    }
+                }
+            }
+
+            String sourceRow = "SOURCE_ROW"; // Dummy source vertex for constant Dijkstra calls
+            vertices.add(sourceRow);
+            String sourceCol = "SOURCE_COL"; // Dummy source vertex for constant Dijkstra calls
+            vertices.add(sourceCol);
+
+            // Add edges from the source vertex to all vertices in the first row
+            for (int row = 0; row < height; row++) {
+                String vertex = row + ",0";
+                graph.addEdge(sourceRow, vertex, 0);
+            }
+
+            // Run Dijkstra's algorithm from the source row
+            Map<String, Long> rowDistances = graph.getShortestPaths(sourceRow);
+
+            // Add cheap right side edges to the graph
+            for (int row = 0; row < height; row++) {
+                String rightPixel = row + "," + (width - 1);
+                Long cost = rowDistances.get(rightPixel);
+                if (cost != null && cost < getThreshold(width)) {
+                    rowSeps.add(row);
+                }
+            }
+
+            // Add edges from the source vertex to all vertices in the first column
+            for (int col = 0; col < width; col++) {
+                String vertex = "0," + col;
+                graph.addEdge(sourceCol, vertex, 0);
+            }
+
+            // Run Dijkstra's algorithm from the source column
+            Map<String, Long> colDistances = graph.getShortestPaths(sourceCol);
+
+            // Add cheap bottom side edges to the graph
+            for (int col = 0; col < width; col++) {
+                String bottomPixel = (height - 1) + "," + col;
+                Long cost = colDistances.get(bottomPixel);
+                if (cost != null && cost < getThreshold(height)) {
+                    colSeps.add(col);
+                }
+            }
+        }
+        catch (IOException e) {
+            System.out.println("Error loading image: " + e.getMessage());
+        }
+
+        return new Pair<>(rowSeps, colSeps);
+    }
+
+    // Unsure about this one
+    private static int getIntensity(int rgb) {
+        Color color = new Color(rgb);
+        return (int) (0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue());
+    }
+
+    // Unsure about this one
+    private static long getThreshold(int length) {
+        return length * 250L;
     }
 }

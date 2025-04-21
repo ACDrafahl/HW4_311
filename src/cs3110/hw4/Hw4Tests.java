@@ -2,9 +2,6 @@ package cs3110.hw4;
 
 import java.util.*;
 
-import java.awt.Color; 
-import java.awt.image.BufferedImage;
-
 public class Hw4Tests {
     public static void main(String[] args) {
         System.out.println("Running all tests...\n");

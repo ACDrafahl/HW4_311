@@ -1,6 +1,5 @@
 package cs3110.hw4;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
@@ -46,6 +45,7 @@ public class WeightedAdjacencyListTests<T> {
      *    Good luck!
      */
 
+    @SuppressWarnings("unchecked")
     @Test
     //@Ignore
     /**
@@ -66,6 +66,7 @@ public class WeightedAdjacencyListTests<T> {
         assertTrue("W should contain 'A'.", W.hasVertex((T) "A"));
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     //@Ignore
     /**
@@ -97,6 +98,7 @@ public class WeightedAdjacencyListTests<T> {
         assertFalse("B should not be a neighbor of D.", W.areNeighbors((T) "B", (T) "D"));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     //@Ignore
     /**
@@ -138,6 +140,7 @@ public class WeightedAdjacencyListTests<T> {
         System.out.println("Elapsed time for test 3: " + (endTime - startTime) + "ms");
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     //@Ignore
     /**
@@ -227,6 +230,7 @@ public class WeightedAdjacencyListTests<T> {
      *    N-M       = 4
      *    O-P       = 0
      */
+    @SuppressWarnings("unchecked")
     public WeightedAdjacencyList<T> makeBigOlGraph() {
         List<T> vertices = List.of((T[]) new String[]{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P"});
         WeightedAdjacencyList<T> W = new WeightedAdjacencyList<>(vertices);
@@ -256,6 +260,7 @@ public class WeightedAdjacencyListTests<T> {
         return W;
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     //@Ignore
     /**
@@ -288,6 +293,7 @@ public class WeightedAdjacencyListTests<T> {
         System.out.println("Elapsed time for test 5: " + (endTime - startTime) + "ms");
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     //@Ignore
     /**
