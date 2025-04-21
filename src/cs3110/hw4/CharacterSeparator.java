@@ -78,6 +78,11 @@ public class CharacterSeparator {
                 }
             }
 
+            String sourceRow = "SOURCE_ROW"; // Dummy source vertex for constant Dijkstra calls
+            vertices.add(sourceRow);
+            String sourceCol = "SOURCE_COL"; // Dummy source vertex for constant Dijkstra calls
+            vertices.add(sourceCol);
+
             WeightedGraph<String> graph = new WeightedAdjacencyList<>(vertices);
 
             // Pair pixels with their neighbors
@@ -103,12 +108,7 @@ public class CharacterSeparator {
                     }
                 }
             }
-
-            String sourceRow = "SOURCE_ROW"; // Dummy source vertex for constant Dijkstra calls
-            vertices.add(sourceRow);
-            String sourceCol = "SOURCE_COL"; // Dummy source vertex for constant Dijkstra calls
-            vertices.add(sourceCol);
-
+            
             // Add edges from the source vertex to all vertices in the first row
             for (int row = 0; row < height; row++) {
                 String vertex = row + ",0";

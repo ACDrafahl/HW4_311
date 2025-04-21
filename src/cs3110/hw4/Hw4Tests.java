@@ -15,7 +15,8 @@ public class Hw4Tests {
         System.out.println("\nAll tests completed.");
 
         System.out.println("\nCreating visualization...");
-        CharacterSeparator.visualizeSeparations("resources/test.bmp");
+        //System.out.println("Working directory: " + System.getProperty("user.dir"));
+        CharacterSeparator.visualizeSeparations("src/cs3110/hw4/test.bmp");
     }
 
     public static void testWeightedGraphBasicOperations() {
@@ -81,7 +82,7 @@ public class Hw4Tests {
     public static void testCharacterSeparatorSimpleImage() {
         System.out.println("Testing Character Separator:");
         try {
-            String testImagePath = "resources/test.bmp";
+            String testImagePath = "src/cs3110/hw4/test.bmp";
             Pair<List<Integer>, List<Integer>> separations = 
                 CharacterSeparator.findSeparationWeighted(testImagePath);
             
