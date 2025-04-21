@@ -3,6 +3,20 @@ package cs3110.hw4;
 import java.util.*;
 
 public class WeightedAdjacencyList<T> implements WeightedGraph<T> {
+    
+    private final Map<T, List<Pair<T, Long>>> adjacencyList;
+
+    /**
+     * Constructor for the WeightedAdjacencyList class. Initializes the graph with empty adjacency lists.
+     * @param vertices A list of vertices to initialize the graph with.
+     */
+    public WeightedAdjacencyList(List<T> vertices) {
+        adjacencyList = new HashMap<>();
+        for (T vertex : vertices) {
+            adjacencyList.put(vertex, new ArrayList<>());
+        }
+    }
+
     /**
      * Adds the directed edge (u,v) to the graph. If the edge is already present, it should not be modified.
      * @param u The source vertex.
@@ -94,6 +108,44 @@ public class WeightedAdjacencyList<T> implements WeightedGraph<T> {
      */
     @Override
     public Map<T, Long> getShortestPaths(T s) {
-        return Map.of();
+        // Distance map to return
+        Map<T, Long> distances = new HashMap<>();
+
+        // Priority queue for Dijkstra's algorithm
+        PriorityQueue<Pair<T, Long>> queue = new PriorityQueue<>(Comparator.comparingLong(Pair::getSecond));
+
+        // Initialize distances
+        for (T vertex: adjacencyList.keySet()) {
+            distances.put(vertex, Long.MAX_VALUE); // Set all distances to infinity
+        }
+        distances.put(s, 0L); // Distance to source is 0
+        queue.add(new Pair<>(s, 0L)); // Add source to the queue
+
+        // Dijkstra's algorithm
+        while (!queue.isEmpty()) {
+            Pair<T, Long> current = queue.poll();
+            T u = current.getFirst();
+            long currentDistance = current.getSecond();
+
+            // If current distance is greater than one we already found, skip
+            if (currentDistance > distances.get(u)) {
+                continue;
+            }
+
+            // Explore neighbors
+            for (Pair<T, Long> neighbor : adjacencyList.get(u)) {
+                T v = neighbor.getFirst();
+                long weight = neighbor.getSecond();
+                long newDistance = currentDistance + weight;
+
+                // Relax the edge
+                if (newDistance < distances.get(v)) {
+                    distances.put(v, newDistance);
+                    queue.add(new Pair<>(v, newDistance));
+                }
+            }
+        }
+        
+        return distances;
     }
 }
