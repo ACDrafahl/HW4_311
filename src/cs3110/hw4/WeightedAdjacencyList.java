@@ -30,77 +30,121 @@ public class WeightedAdjacencyList<T> implements WeightedGraph<T> {
         if (neighbors == null || adjacencyList.get(v) == null || weight < 0) {
             return false; // u or v not in graph or negative weight
         }
+
         for (Pair<T, Long> neighbor : neighbors) {
             if (neighbor.getFirst().equals(v)) {
                 return false; // Edge already present
             }
         }
+
         neighbors.add(new Pair<>(v, (long) weight));
         return true; // Edge added successfully
     }
 
     /**
+     * Adds a vertex to the graph. If the vertex is already present, it should not be modified.
      * @param vertex A vertex to add to the graph.
      * @return False vertex was already in the graph, true otherwise.
      */
     @Override
     public boolean addVertex(T vertex) {
-        return false;
+        if (adjacencyList.containsKey(vertex)) { // Vertex already in the graph
+            return false;
+        }
+        else {
+            adjacencyList.put(vertex, new ArrayList());
+            return true;
+        }
     }
 
     /**
+     * Returns the number of vertices in the graph.
      * @return |V|
      */
     @Override
     public int getVertexCount() {
-        return 0;
+        return adjacencyList.size();
     }
 
     /**
+     * Checks if a vertex is in the graph.
      * @param v The name of a vertex.
      * @return True if v is in the graph, false otherwise.
      */
     @Override
     public boolean hasVertex(T v) {
-        return false;
+        return adjacencyList.containsKey(v);
     }
 
     /**
+     * Returns an iterable of all vertices in the graph.
      * @return An Iterable of V.
      */
     @Override
     public Iterable<T> getVertices() {
-        return null;
+        return adjacencyList.keySet();
     }
 
     /**
+     * Returns the number of edges in the graph.
      * @return |E|
      */
     @Override
     public int getEdgeCount() {
-        return 0;
+        int edgeCount = 0;
+        // Works becauset the graph is directed, so we 
+        // can just add all neighbors of each vertex
+        for (List<Pair<T, Long>> neighbors : adjacencyList.values()) {
+            edgeCount += neighbors.size();
+        }
+
+        return edgeCount;
     }
 
     /**
+     * Checks if an edge is in the graph.
      * @param u The source of the edge.
      * @param v The target of the edge.
      * @return True if (u,v) is in the graph, false otherwise.
      */
     @Override
-    public boolean hasEdge(T u, T v) {
-        return false;
+    public boolean hasEdge(T u, T v) { 
+        List<Pair<T, Long>> neighbors = adjacencyList.get(u);
+        if (neighbors == null) {
+            return false; // u not in graph
+        }
+
+        for (Pair<T, Long> neighbor : neighbors) {
+            if (neighbor.getFirst().equals(v)) {
+                return true; // Edge found
+            }
+        }
+
+        return false; // Edge not found after search
     }
 
     /**
+     * Returns all neighbors of vertex u.
      * @param u A vertex.
      * @return The neighbors of u in the weighted graph.
      */
     @Override
     public Iterable<T> getNeighbors(T u) {
-        return null;
+        List<Pair<T, Long>> neighbors = adjacencyList.get(u);
+        if (neighbors == null) {
+            return Collections.emptyList(); // u not in graph
+        }
+        
+        List<T> neighborVertices = new ArrayList<>();
+        for (Pair<T, Long> neighbor : neighbors) {
+            neighborVertices.add(neighbor.getFirst());
+        }
+        
+        return neighborVertices; // Return the list of neighbors
     }
 
     /**
+     * Checks if two vertices are neighbors in the grap (uses hasEdge).
      * @param u
      * @param v
      * @return
