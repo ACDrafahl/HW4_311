@@ -168,10 +168,11 @@ public class WeightedAdjacencyList<T> implements WeightedGraph<T> {
         // Priority queue for Dijkstra's algorithm
         PriorityQueue<Pair<T, Long>> queue = new PriorityQueue<>(Comparator.comparingLong(Pair::getSecond));
 
-        // Initialize distances
-        for (T vertex: adjacencyList.keySet()) {
-            distances.put(vertex, Long.MAX_VALUE); // Set all distances to infinity
-        }
+        // Potentially ditching this
+        // // Initialize distances
+        // for (T vertex: adjacencyList.keySet()) {
+        //     distances.put(vertex, Long.MAX_VALUE); // Set all distances to infinity
+        // }
         distances.put(s, 0L); // Distance to source is 0
         queue.add(new Pair<>(s, 0L)); // Add source to the queue
 
@@ -190,10 +191,13 @@ public class WeightedAdjacencyList<T> implements WeightedGraph<T> {
             for (Pair<T, Long> neighbor : adjacencyList.get(u)) {
                 T v = neighbor.getFirst();
                 long weight = neighbor.getSecond();
+                if (weight < 0) {
+                    throw new IllegalArgumentException("Graph contains negative edge weights. Dijkstra cannot proceed.");
+                }
                 long newDistance = currentDistance + weight;
 
                 // Relax the edge
-                if (newDistance < distances.get(v)) {
+                if (!distances.containsKey(v) || newDistance < distances.get(v)) {
                     distances.put(v, newDistance);
                     queue.add(new Pair<>(v, newDistance));
                 }

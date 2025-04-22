@@ -16,7 +16,16 @@ public class Hw4Tests {
 
         System.out.println("\nCreating visualization...");
         //System.out.println("Working directory: " + System.getProperty("user.dir"));
-        CharacterSeparator.visualizeSeparations("src/cs3110/hw4/test.bmp");
+        CharacterSeparator.visualizeSeparations("src/cs3110/hw4/test1.bmp");
+        CharacterSeparator.visualizeSeparations("src/cs3110/hw4/test2.bmp");
+        CharacterSeparator.visualizeSeparations("src/cs3110/hw4/test3.bmp");
+        CharacterSeparator.visualizeSeparations("src/cs3110/hw4/test4.bmp");
+        CharacterSeparator.visualizeSeparations("src/cs3110/hw4/test5.bmp");
+        CharacterSeparator.visualizeSeparations("src/cs3110/hw4/test6.bmp");
+        CharacterSeparator.visualizeSeparations("src/cs3110/hw4/test7.bmp");
+        CharacterSeparator.visualizeSeparations("src/cs3110/hw4/test8.bmp");
+        CharacterSeparator.visualizeSeparations("src/cs3110/hw4/test9.bmp");
+        CharacterSeparator.visualizeSeparations("src/cs3110/hw4/test10.bmp");
     }
 
     public static void testWeightedGraphBasicOperations() {

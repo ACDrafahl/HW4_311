@@ -39,7 +39,7 @@ public class CharacterSeparator {
             }
             
             processor.writeToFile();
-            System.out.println("Saving processed image as: " + inputPath + ".new.bmp");
+            //System.out.println("Saving processed image as: " + inputPath + ".new.bmp");
             
         } 
         catch (IOException e) {
@@ -94,17 +94,19 @@ public class CharacterSeparator {
                     if (j + 1 < width) {
                         String rightVertex = i + "," + (j + 1);
                         int rightValue = getIntensity(pixelMatrix[i][j + 1]);
-                        int weight = (currentValue + rightValue) / 2;
-                        graph.addEdge(currentVertex, rightVertex, weight); // Add both directions
-                        graph.addEdge(rightVertex, currentVertex, weight); // to get undirected edges (unsure about this)
+                        if (currentValue == 255 && rightValue == 255) {
+                            graph.addEdge(currentVertex, rightVertex, 0); // Add edge with weight 0
+                            graph.addEdge(rightVertex, currentVertex, 0); // Add edge in the opposite direction
+                        }
                     }
 
                     if (i + 1 < height) {
                         String downVertex = (i + 1) + "," + j;
                         int downValue = getIntensity(pixelMatrix[i + 1][j]);
-                        int weight = (currentValue + downValue) / 2;
-                        graph.addEdge(currentVertex, downVertex, weight); // Add both directions
-                        graph.addEdge(downVertex, currentVertex, weight); // to get undirected edges (unsure about this)
+                        if (currentValue == 255 && downValue == 255) {
+                            graph.addEdge(currentVertex, downVertex, 0); // Add edge with weight 0
+                            graph.addEdge(downVertex, currentVertex, 0); // Add edge in the opposite direction
+                        }
                     }
                 }
             }
@@ -122,7 +124,7 @@ public class CharacterSeparator {
             for (int row = 0; row < height; row++) {
                 String rightPixel = row + "," + (width - 1);
                 Long cost = rowDistances.get(rightPixel);
-                if (cost != null && cost < getThreshold(width)) {
+                if (cost != null) {
                     rowSeps.add(row);
                 }
             }
@@ -140,7 +142,7 @@ public class CharacterSeparator {
             for (int col = 0; col < width; col++) {
                 String bottomPixel = (height - 1) + "," + col;
                 Long cost = colDistances.get(bottomPixel);
-                if (cost != null && cost < getThreshold(height)) {
+                if (cost != null) {
                     colSeps.add(col);
                 }
             }
@@ -153,13 +155,27 @@ public class CharacterSeparator {
     }
 
     // Unsure about this one
-    private static int getIntensity(int rgb) {
-        Color color = new Color(rgb);
-        return (int) (0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue());
+    private static int getIntensity(int argb) {
+        // Color color = new Color(argb);
+        // return (int) (0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue());
+        
+        
+        Color color = new Color(argb);
+        int red = color.getRed();
+        int green = color.getGreen();
+        int blue = color.getBlue();
+        return (red + green + blue) / 3; 
+
+        
+        // int r = (argb >> 16) & 0xFF;
+        // int g = (argb >> 8) & 0xFF;
+        // int b = argb & 0xFF;
+        // return (int)(0.299 * r + 0.587 * g + 0.114 * b);  // perceptual grayscale
     }
 
     // Unsure about this one
     private static long getThreshold(int length) {
-        return length * 250L;
+        // The threshold is a function of the length of the image
+        return length / 10;
     }
 }
