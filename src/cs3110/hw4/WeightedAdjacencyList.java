@@ -27,6 +27,7 @@ public class WeightedAdjacencyList<T> implements WeightedGraph<T> {
     @Override
     public boolean addEdge(T u, T v, int weight) {
         List<Pair<T, Long>> neighbors = adjacencyList.get(u);
+        
         if (neighbors == null || adjacencyList.get(v) == null || weight < 0) {
             return false; // u or v not in graph or negative weight
         }
@@ -165,14 +166,16 @@ public class WeightedAdjacencyList<T> implements WeightedGraph<T> {
         // Distance map to return
         Map<T, Long> distances = new HashMap<>();
 
+        // Hash set to keep track of visited vertices
+        Set<T> visited = new HashSet<>();
+
         // Priority queue for Dijkstra's algorithm
         PriorityQueue<Pair<T, Long>> queue = new PriorityQueue<>(Comparator.comparingLong(Pair::getSecond));
 
-        // Potentially ditching this
-        // // Initialize distances
-        // for (T vertex: adjacencyList.keySet()) {
-        //     distances.put(vertex, Long.MAX_VALUE); // Set all distances to infinity
-        // }
+        // Initialize distances
+        for (T vertex: adjacencyList.keySet()) {
+            distances.put(vertex, Long.MAX_VALUE); // Set all distances to infinity
+        }
         distances.put(s, 0L); // Distance to source is 0
         queue.add(new Pair<>(s, 0L)); // Add source to the queue
 
@@ -187,6 +190,14 @@ public class WeightedAdjacencyList<T> implements WeightedGraph<T> {
                 continue;
             }
 
+            // Add a hashset here that skips if it's already been visited
+            // If we have already visited this vertex, skip it
+            if (visited.contains(u)) {
+                continue;
+            }
+            visited.add(u);
+            
+            
             // Explore neighbors
             for (Pair<T, Long> neighbor : adjacencyList.get(u)) {
                 T v = neighbor.getFirst();
