@@ -7,44 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.awt.Color;
-import java.awt.image.BufferedImage;
 
 public class CharacterSeparator {
-    // Added for testing
-    public static void visualizeSeparations(String inputPath) {
-        try {
-            System.out.println("Loading image from: " + inputPath);
-
-            Pair<List<Integer>, List<Integer>> separations = findSeparationWeighted(inputPath);
-            List<Integer> rowSeps = separations.getFirst();
-            List<Integer> colSeps = separations.getSecond();
-
-            BitmapProcessor processor = new BitmapProcessor(inputPath);
-            BufferedImage image = processor.bi;
-            int width = image.getWidth();
-            int height = image.getHeight();
-
-            System.out.println("Found " + rowSeps.size() + " row separations");
-            System.out.println("Found " + colSeps.size() + " column separations");
-
-            for (Integer row : rowSeps) {
-                for (int x = 0; x < width; x++) {
-                    image.setRGB(x, row, Color.RED.getRGB());
-                }
-            }
-
-            for (Integer col : colSeps) {
-                for (int y = 0; y < height; y++) {
-                    image.setRGB(col, y, Color.GREEN.getRGB());
-                }
-            }
-
-            processor.writeToFile();
-        } catch (IOException e) {
-            System.out.println("Error processing image: " + e.getMessage());
-        }
-    }
-
     /**
      * This method uses the WeightedAdjacencyList class to identify the space
      * between characters in an image of text.
