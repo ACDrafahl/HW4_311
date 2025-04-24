@@ -14,34 +14,33 @@ public class CharacterSeparator {
     public static void visualizeSeparations(String inputPath) {
         try {
             System.out.println("Loading image from: " + inputPath);
-            
+
             Pair<List<Integer>, List<Integer>> separations = findSeparationWeighted(inputPath);
             List<Integer> rowSeps = separations.getFirst();
             List<Integer> colSeps = separations.getSecond();
-            
+
             BitmapProcessor processor = new BitmapProcessor(inputPath);
             BufferedImage image = processor.bi;
             int width = image.getWidth();
             int height = image.getHeight();
-            
+
             System.out.println("Found " + rowSeps.size() + " row separations");
             System.out.println("Found " + colSeps.size() + " column separations");
-            
+
             for (Integer row : rowSeps) {
                 for (int x = 0; x < width; x++) {
                     image.setRGB(x, row, Color.RED.getRGB());
                 }
             }
-            
+
             for (Integer col : colSeps) {
                 for (int y = 0; y < height; y++) {
                     image.setRGB(col, y, Color.GREEN.getRGB());
                 }
             }
-            
+
             processor.writeToFile();
-        } 
-        catch (IOException e) {
+        } catch (IOException e) {
             System.out.println("Error processing image: " + e.getMessage());
         }
     }
@@ -50,8 +49,7 @@ public class CharacterSeparator {
      * This method uses the WeightedAdjacencyList class to identify the space
      * between characters in an image of text.
      * For efficiency, it should only construct a single graph object and should
-     * only make a constant
-     * number of calls to Dijkstra's algorithm.
+     * only make a constant number of calls to Dijkstra's algorithm.
      * 
      * @param path The location of the image on disk.
      * @return Two lists of Integer. The first list indicates whitespace rows. The
@@ -67,57 +65,51 @@ public class CharacterSeparator {
             BitmapProcessor processor = new BitmapProcessor(path);
             int[][] pixelMatrix = processor.getRGBMatrix();
 
-            // Create a graph from the pixel matrix
             int height = pixelMatrix.length;
             int width = pixelMatrix[0].length;
-            List<String> rowVertices = new ArrayList<>();
-            List<String> colVertices = new ArrayList<>();
+            List<String> vertices = new ArrayList<>();
 
-            String sourceRow = "SOURCE_ROW"; // Dummy source vertex for constant Dijkstra calls
-            String sourceCol = "SOURCE_COL"; // Dummy source vertex for constant Dijkstra calls
+            String sourceRow = "SOURCE_ROW";
+            String sourceCol = "SOURCE_COL";
 
-            rowVertices.add(sourceRow);
-            colVertices.add(sourceCol);
+            vertices.add(sourceRow);
+            vertices.add(sourceCol);
 
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    rowVertices.add(i + "," + j);
-                    colVertices.add(i + "," + j);
+                    vertices.add(i + "," + j);
                 }
             }
 
-            WeightedGraph<String> rowGraph = new WeightedAdjacencyList<>(rowVertices);
-            WeightedGraph<String> colGraph = new WeightedAdjacencyList<>(colVertices);
+            WeightedAdjacencyList<String> graph = new WeightedAdjacencyList<>(vertices);
 
-            // Set up weighted horizontal edges between pixels for row detection
+            // Set up weighted edges between pixels
             for (int i = 0; i < height; i++) {
-                for (int j = 0; j < width - 1; j++) {
-                    String current = i + "," + j;
-                    String right = i + "," + (j + 1);
-                    int intensity = (getIntensity(pixelMatrix[i][j]) + getIntensity(pixelMatrix[i][j + 1])) / 2;
-                    rowGraph.addEdge(current, right, 255 - intensity);
-                }
-            }
-
-            // Set up weighted vertical edges between pixels for column detection
-            for (int i = 0; i < height - 1; i++) {
                 for (int j = 0; j < width; j++) {
                     String current = i + "," + j;
-                    String down = (i + 1) + "," + j;
-                    int intensity = (getIntensity(pixelMatrix[i][j]) + getIntensity(pixelMatrix[i + 1][j])) / 2;
-                    colGraph.addEdge(current, down, 255 - intensity);
+
+                    // Right neighbor
+                    if (j + 1 < width) {
+                        String right = i + "," + (j + 1);
+                        int weight = getPixelCost(pixelMatrix[i][j], pixelMatrix[i][j + 1]);
+                        graph.addEdge(current, right, weight);
+                    }
+
+                    // Down neighbor
+                    if (i + 1 < height) {
+                        String down = (i + 1) + "," + j;
+                        int weight = getPixelCost(pixelMatrix[i][j], pixelMatrix[i + 1][j]);
+                        graph.addEdge(current, down, weight);
+                    }
                 }
             }
 
             // Add edges from the source vertex to all vertices in the first column of each row
             for (int i = 0; i < height; i++) {
-                rowGraph.addEdge(sourceRow, i + ",0", 0);
+                graph.addEdge(sourceRow, i + ",0", 0);
             }
-
             // Run Dijkstra's algorithm from the source row
-            Map<String, Long> rowDistances = rowGraph.getShortestPaths(sourceRow);
-
-            // Identify cheap horizontal paths as row separators
+            Map<String, Long> rowDistances = graph.getShortestPaths(sourceRow);
             for (int i = 0; i < height; i++) {
                 String rightMost = i + "," + (width - 1);
                 Long cost = rowDistances.get(rightMost);
@@ -128,13 +120,10 @@ public class CharacterSeparator {
 
             // Add edges from the source vertex to all vertices in the top row of each column
             for (int j = 0; j < width; j++) {
-                colGraph.addEdge(sourceCol, "0," + j, 0);
+                graph.addEdge(sourceCol, "0," + j, 0);
             }
-
             // Run Dijkstra's algorithm from the source column
-            Map<String, Long> colDistances = colGraph.getShortestPaths(sourceCol);
-
-            // Identify cheap vertical paths as column separators
+            Map<String, Long> colDistances = graph.getShortestPaths(sourceCol);
             for (int j = 0; j < width; j++) {
                 String bottomMost = (height - 1) + "," + j;
                 Long cost = colDistances.get(bottomMost);
@@ -142,6 +131,7 @@ public class CharacterSeparator {
                     colSeps.add(j);
                 }
             }
+
         } catch (IOException e) {
             System.out.println("Error loading image: " + e.getMessage());
         }
@@ -163,14 +153,24 @@ public class CharacterSeparator {
         return new Pair<>(rowSeps, colSeps);
     }
 
-    // Unsure about this one
+    // Get the average intensity of a pixel
     private static int getIntensity(int argb) {
         Color color = new Color(argb);
         return (color.getRed() + color.getGreen() + color.getBlue()) / 3;
     }
 
-    // Give a threshold as a function of the image size
+    // Assign higher cost to darker pixel paths, white pixels ~5, darker = more
+    private static int getPixelCost(int argb1, int argb2) {
+        int intensity1 = getIntensity(argb1);
+        int intensity2 = getIntensity(argb2);
+        int avgIntensity = (intensity1 + intensity2) / 2;
+        return 5 + (255 - avgIntensity) / 8;
+    }
+
+    // This threshold is used to determine if the cost of a path is low enough to
+    // indicate a separation between characters. It should be adjusted based on the
+    // expected noise in the image.
     private static long getThreshold(int length) {
-        return (long) (length * 0.1); // Example threshold: 10% of the image size
+        return length * 5; // Adjust as needed to tolerate slight noise
     }
 }

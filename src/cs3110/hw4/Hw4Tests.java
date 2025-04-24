@@ -29,6 +29,7 @@ public class Hw4Tests {
         CharacterSeparator.visualizeSeparations("src/cs3110/hw4/test10.bmp");
         CharacterSeparator.visualizeSeparations("src/cs3110/hw4/test11.bmp");
         CharacterSeparator.visualizeSeparations("src/cs3110/hw4/test12.bmp");
+        CharacterSeparator.visualizeSeparations("src/cs3110/hw4/test13.bmp");
     }
 
     public static void testWeightedGraphBasicOperations() {
